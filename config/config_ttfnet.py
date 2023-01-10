@@ -167,7 +167,7 @@ class Config(object):
             RandomCrop(crop_prob=0.3),
             RandomTranslate(translate_prob=0.3),
             Normalize(),
-            Resize(resize=input_image_size),  # uniform-scale image
+            # Resize(resize=input_image_size),  # uniform-scale image
             # Actual multiscale ranges: [640 - 3 * 32, 640 + 3 * 32].
             Resize(resize=input_image_size, stride=32, multiscale_range=3)  # multi-scale image
         ]),
@@ -186,14 +186,14 @@ class Config(object):
         ])
     )
 
-    print("*"*20)
+    print('*' * 20)
     print("input_image_size", input_image_size[0], input_image_size[1])
     print("per_node_batch_size", per_node_batch_size)
     print("epochs", epochs)
     print("neck_dict", neck_dict)
     print("head_dict", head_dict)
     print("mosaic", mosaic)
-    print("*"*20)
+    print('*' * 20)
 
     remark = "{}_{}_{}_epoch{}_size{}-{}_mosaic{}".format(
         network, backbone_type, neck_type, epochs, input_image_size[0], input_image_size[1], mosaic)
