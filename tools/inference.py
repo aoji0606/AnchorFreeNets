@@ -50,7 +50,7 @@ model = models.__dict__[Config.network](**{
 })
 decoder_name = Config.network + "Decoder"
 decoder = decoder.__dict__[decoder_name](**Config.decoder_dict)
-resize = Config.input_image_size
+resize = max(Config.input_image_size)
 
 device = torch.device("cpu")
 if use_gpu:
