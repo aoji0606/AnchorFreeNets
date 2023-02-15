@@ -1,6 +1,5 @@
 import os
 import cv2
-
 import torch
 import numpy as np
 import random
@@ -634,14 +633,15 @@ class Resize(object):
         # resize image
         max_image_size = max(height, width)
 
-        _resize = max(self.resize[0], self.resize[1])
         if self.multiscale_range > 0:
+            _resize = max(self.resize[0], self.resize[1])
             min_resize = int(((_resize + self.stride) // self.stride - self.multiscale_range) * self.stride)
             max_resize = int(
                 ((_resize + self.stride) // self.stride + self.multiscale_range) * self.stride)  # int(_resize) #
             _resize = random.choice(range(min_resize, max_resize, self.stride))
 
-        resize_factor = _resize / max_image_size
+        # resize_factor = _resize / max_image_size
+        resize_factor = min(1. * self.resize[0] / height, 1. * self.resize[1] / width)
         resize_height, resize_width = int(height * resize_factor), int(width * resize_factor)
         image = cv2.resize(image, (resize_width, resize_height))
 
@@ -834,8 +834,7 @@ if __name__ == '__main__':
     if not os.path.join("/home/jovyan/fast-data/test/"):
         os.mkdir("/home/jovyan/fast-data/test/")
 
-    size = (320, 416)
-#     size=(512,512)
+    size = (320, 512)
     base_path = '/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/'
     train_dataset = CocoDetection(
         image_root_dir=base_path,
@@ -850,7 +849,7 @@ if __name__ == '__main__':
             Normalize(),
             # Actual multiscale ranges: [640 - 5 * 32, 640 + 5 * 32].
             Resize(resize=size, stride=32, multiscale_range=3)  # multi-scale image
-#             Resize(resize=size)  # uniform-scale image
+            # Resize(resize=size)  # uniform-scale image
         ]),
         mosaic=False,
         mosaic_prob=0.5,
