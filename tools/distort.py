@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 
-def MyDistort(img):
+def MyDistort(img, fx, fy, cx, cy):
     k1, k2, k3 = -0.0324797, -0.0124873, 0.00710845  # 径向畸变
     p1, p2 = 0, 0  # 切向畸变
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     k1, k2, k3, k4 = -0.0324797, -0.0124873, 0.00710845, -0.00250132  # 径向畸变
     p1, p2 = 0, 0  # 切向畸变
 
-    MyDistort(img)
+    MyDistort(img, fx, fy, cx, cy)
 
     camera_matrix = np.array([[fx, 0, cx],
                               [0, fy, cy],
