@@ -30,6 +30,8 @@ def MyDistort(img, fx, fy, cx, cy):
                 my_distort[y_index, x_index] = img[int(y_distorted), int(x_distorted)]
             else:
                 my_distort[y_index, x_index] = 0
+
+    print(my_distort.shape)
     cv.imshow("my_distort", my_distort)
 
 
@@ -40,6 +42,7 @@ if __name__ == '__main__':
     height = height // rate
     width = width // rate
     img = cv.resize(img, (width, height))
+    print(img.shape)
     cv.imshow("img", img)
 
     fx, fy = 929.760 / rate, 930.612 / rate  # 焦距
@@ -55,10 +58,12 @@ if __name__ == '__main__':
 
     dist_coef = np.array([k1, k2, p1, p2, k3])
     normal_distort = cv.undistort(img, camera_matrix, dist_coef)
+    print(normal_distort.shape)
     cv.imshow("normal_distort", normal_distort)
 
     dist_coef = np.array([k1, k2, k3, k4])
     fisheye_distort = cv.fisheye.undistortImage(img, camera_matrix, dist_coef, Knew=camera_matrix)
+    print(fisheye_distort.shape)
     cv.imshow('fisheye_distort', fisheye_distort)
 
     cv.waitKey(0)
