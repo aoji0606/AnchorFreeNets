@@ -1,16 +1,13 @@
 import json
 
 
-# j1_dir = "/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/1109_1w/annotations/instances_default.json"
-# j2_dir = "/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/1125_1.5w/annotations/instances_default.json"
-
-j1_dir = "/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/1107_9w/annotations/instances_default.json"
-j2_dir = "/home/jovyan/fast-data/temp.json"
+j1_dir = "1.json"
+j2_dir = "2.json"
 
 j1 = json.load(open(j1_dir, "r"))
 j2 = json.load(open(j2_dir, "r"))
     
-new_dir = "/home/jovyan/fast-data/instances_default.json"
+new_dir = "res.json"
 
 print(j1["categories"]==j2["categories"])
 
