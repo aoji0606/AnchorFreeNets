@@ -3,9 +3,9 @@ import numpy as np
 from tqdm import tqdm
 
 test_num = 20000
-json_dir = "/home/jovyan/fast-data/instances_default.json"
-train_json_dir = "/home/jovyan/fast-data/train.json"
-test_json_dir = "/home/jovyan/fast-data/test.json"
+json_dir = "instances_default.json"
+train_json_dir = "instances_train.json"
+test_json_dir = "instances_test.json"
 
 all_json = json.load(open(json_dir, "r"))
 
