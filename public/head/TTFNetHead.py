@@ -96,6 +96,6 @@ class TTFNetHead(nn.Module):
 
     def forward(self, x):
         heatmap_output = self.heatmap_head(x[-1])
-        wh_output = F.relu(self.wh_head(x[-1]) + 0.1) * self.wh_offset_base  # scale wh
+        wh_output = F.relu(self.wh_head(x[-1])) * self.wh_offset_base  # scale wh
         return heatmap_output, wh_output
 
