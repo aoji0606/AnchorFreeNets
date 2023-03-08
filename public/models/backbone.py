@@ -189,8 +189,27 @@ class MobileNetV2Backbone(nn.Module):
 
         for i, (k, v) in enumerate(self.model.items()):
             x = v(x)
-            if i in [3, 6, 13, 17]: # 320
-#             if i in [3, 6, 13, 16]: # 160
+            if i in [3, 6, 13, 17]:  # 320
+                features.append(x)
+
+        return features
+
+
+class ConvNextBackbone(nn.Module):
+    def __init__(self, mobilenet_type='mobilenetv2', pretrained=False):
+        super(ConvNextBackbone, self).__init__()
+        model = torchvision.models.convnext_large(pretrained=pretrained)
+
+        self.model = nn.ModuleDict({})
+        for i in range(8):
+            self.model["feature%d" % i] = model.features[i]
+
+    def forward(self, x):
+        features = []
+
+        for i, (k, v) in enumerate(self.model.items()):
+            x = v(x)
+            if i in [1, 3, 5, 7]:
                 features.append(x)
 
         return features
@@ -687,6 +706,8 @@ def get_backbone(backbone_type, pretrained, backbone_dict={}):
         return RMobilenetPruning(backbone_type, pretrained)
     elif "mobilenetv2" in backbone_type:
         return MobileNetV2Backbone(backbone_type, pretrained)
+    elif "convnext" in backbone_type:
+        return ConvNextBackbone(backbone_type, pretrained)
 
 
 if __name__ == '__main__':
