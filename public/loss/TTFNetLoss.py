@@ -261,6 +261,11 @@ class TTFNetLoss(nn.Module):
         y, x = np.ogrid[-m:m + 1, -n:n + 1]
 
         h = np.exp(-(x * x / (2 * sigma_x * sigma_x) + y * y / (2 * sigma_y * sigma_y)))
+
+#         print("*"*20)
+#         print(shape, h)
+#         print("*"*20)
+        
         h[h < np.finfo(h.dtype).eps * h.max()] = 0
 
         return h

@@ -631,10 +631,10 @@ class Resize(object):
         height, width, _ = image.shape
 
         # resize image
-        max_image_size = max(height, width)
+        # max_image_size = max(height, width)
 
+        _resize = max(self.resize[0], self.resize[1])
         if self.multiscale_range > 0:
-            _resize = max(self.resize[0], self.resize[1])
             min_resize = int(((_resize + self.stride) // self.stride - self.multiscale_range) * self.stride)
             max_resize = int(
                 ((_resize + self.stride) // self.stride + self.multiscale_range) * self.stride)  # int(_resize) #
@@ -834,30 +834,31 @@ if __name__ == '__main__':
     if not os.path.join("/home/jovyan/fast-data/test/"):
         os.mkdir("/home/jovyan/fast-data/test/")
 
-    size = (320, 512)
+    size = (400, 600)
+#     size=(512,512)
     base_path = '/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/'
     train_dataset = CocoDetection(
         image_root_dir=base_path,
         annotation_root_dir=base_path,
         set="test",
         transform=transforms.Compose([
-            RandomColorAndBlur(),
-            RandomAffine(prob=0.3),
-            RandomFlip(flip_prob=0.5),
-            RandomCrop(crop_prob=0.3),
-            RandomTranslate(translate_prob=1),
+#             RandomColorAndBlur(),
+#             RandomAffine(prob=0.3),
+#             RandomFlip(flip_prob=0.5),
+#             RandomCrop(crop_prob=0.3),
+#             RandomTranslate(translate_prob=1),
             Normalize(),
             # Actual multiscale ranges: [640 - 5 * 32, 640 + 5 * 32].
-            Resize(resize=size, stride=32, multiscale_range=3)  # multi-scale image
-            # Resize(resize=size)  # uniform-scale image
+#             Resize(resize=size, stride=32, multiscale_range=3)  # multi-scale image
+            Resize(resize=size)  # uniform-scale image
         ]),
-        mosaic=False,
+        mosaic=True,
         mosaic_prob=0.5,
         image_size=size
     )
     train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=1)
     it = iter(train_loader)
-    for i in range(5):
+    for i in range(10):
         sample = it.next()
         im = sample["img"][0].numpy().astype(np.float32) * 255
 

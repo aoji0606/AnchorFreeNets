@@ -3,7 +3,7 @@ import sys
 import numpy as np
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(
-        os.path.abspath(__file__))))
+    os.path.abspath(__file__))))
 sys.path.append(BASE_DIR)
 
 # from public.path import pretrained_models_path
@@ -18,8 +18,8 @@ import torch.nn as nn
 
 # assert input annotations are[x_min,y_min,x_max,y_max]
 class TTFNet(nn.Module):
-    def __init__(self, backbone_type:str="resnet18", backbone_dict:dict={}, pretrained:bool=False, 
-            neck_type:str="TTFNeck", neck_dict:dict=None, head_dict:dict=None):
+    def __init__(self, backbone_type: str = "resnet18", backbone_dict: dict = {}, pretrained: bool = False,
+                 neck_type: str = "TTFNeck", neck_dict: dict = None, head_dict: dict = None):
         """
         @description  :
         ---------
@@ -50,7 +50,7 @@ class TTFNet(nn.Module):
             'resnet50': (256, 512, 1024, 2048),
             'resnet101': (256, 512, 1024, 2048),
             'resnet152': (256, 512, 1024, 2048),
-            
+
             'densecl_resnet50_coco': (256, 512, 1024, 2048),
             'densecl_resnet50_imagenet': (256, 512, 1024, 2048),
 
@@ -67,14 +67,14 @@ class TTFNet(nn.Module):
 
             # 'rmnet_pruning_18': (64, 128, 256, 512),
             # 'rmnet_pruning_34': (64, 128, 256, 512),
-            
-#             "mobilenetv2": (24, 32, 96, 160)
-            "mobilenetv2": (24, 32, 96, 320)
+
+            "mobilenetv2": (24, 32, 96, 320),
+            "convnext": (192, 384, 768, 1536)
         }
 
         # self.neck = CenterNetNeck(inplanes=C5_inplanes, **neck_dict)
-        print(backbone_type, neck_type)
-#         print(inplanes_dict[backbone_type])
+        # print(backbone_type, neck_type)
+        # print(inplanes_dict[backbone_type])
         self.neck = neck.__dict__[neck_type](inplanes=inplanes_dict[backbone_type], **neck_dict)
         self.head = TTFNetHead(**head_dict)
 
@@ -89,7 +89,7 @@ class TTFNet(nn.Module):
         # if input size:[B,3,640,640]
         # heatmap_output shape:[3, 80, 160, 160]
         # wh_output shape:[3, 4, 160, 160]
-        
+
         backbone_out = self.backbone(inputs)
         if 0:
             print("backbone")
@@ -99,16 +99,17 @@ class TTFNet(nn.Module):
         if 0:
             print("neck")
             return neck_out
-        
+
         heatmap_output, wh_output = self.head(neck_out)
-#         print("head")
+        # print("head")
+
         return heatmap_output, wh_output
 
 
 if __name__ == '__main__':
     neck_dict = dict(out_channels=[256, 128, 64], selayer=True)
     head_dict = dict(num_classes=80,
-                 out_channels=[256, 128, 64])
+                     out_channels=[256, 128, 64])
     net = TTFNet(backbone_type="resnet50", neck_type="TTFNeck", neck_dict=neck_dict, head_dict=head_dict)
     image_h, image_w = 512, 512
     heatmap_output, offset_output, wh_output = net(

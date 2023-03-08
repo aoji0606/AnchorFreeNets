@@ -26,6 +26,6 @@ if __name__ == '__main__':
         model.load_state_dict(checkpoint, strict=False)
 
     model.eval()
-    trace_model = torch.jit.trace(model, torch.Tensor(1, 3, Config.input_image_size, Config.input_image_size))
+    trace_model = torch.jit.trace(model, torch.Tensor(1, 3, Config.input_image_size[0], Config.input_image_size[1]))
     trace_model.save("/home/jovyan/data-vol-polefs-1/rk3566/torch2rknn/ttfnet.pt")
     print("success save trace model")
