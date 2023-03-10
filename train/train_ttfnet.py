@@ -600,9 +600,10 @@ def main():
         scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         if local_rank == 0:
             logger.info(
-                f"finish resuming model from {args.resume}, epoch {checkpoint['epoch']}, best_map: {checkpoint['best_map']}, "
-                f"loss: {checkpoint['loss']:.2f}, heatmap_loss: {checkpoint['heatmap_loss']:.2f}, "
-                f"hw_loss: {checkpoint['hw_loss']:.2f}, kd_loss: {checkpoint['kd_loss']:.2f}"
+                f"finish resuming model from {args.resume}, "
+                f"epoch {checkpoint['epoch']}, best_map: {checkpoint['best_map']:.4f}, "
+                f"heatmap_loss: {checkpoint['heatmap_loss']:.2f}, hw_loss: {checkpoint['hw_loss']:.2f}, "
+                f"kd_loss: {checkpoint['kd_loss']:.2f}, total_loss: {checkpoint['total_loss']:.2f}"
             )
 
     if args.kd:
