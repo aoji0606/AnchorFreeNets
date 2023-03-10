@@ -166,7 +166,7 @@ def parse_args():
 #     def forward(self, images):
 #         with torch.no_grad():
 #             _, _ = self.teacher(images)
-#         student_heatmap_output, student_wh_output = self.student(images)
+#         student_heatmap_output, student_hw_output = self.student(images)
 #
 #         teacher_feats = []
 #         student_feats = []
@@ -180,7 +180,7 @@ def parse_args():
 #             teacher_feats.append(teacher_feat)
 #             student_feats.append(student_feat)
 #
-#         return teacher_feats, student_feats, student_heatmap_output, student_wh_output
+#         return teacher_feats, student_feats, student_heatmap_output, student_hw_output
 
 
 class Distiller():
@@ -222,7 +222,7 @@ class Distiller():
 
         with torch.no_grad():
             _, _ = self.teacher(images)
-        student_heatmap_output, student_wh_output = self.student(images)
+        student_heatmap_output, student_hw_output = self.student(images)
 
         teacher_feats = []
         student_feats = []
@@ -230,11 +230,11 @@ class Distiller():
             teacher_feats.append(self.teacher_kd_layer_feature[teacher_layer])
             student_feats.append(self.student_kd_layer_feature[student_layer])
 
-        return teacher_feats, student_feats, student_heatmap_output, student_wh_output
+        return teacher_feats, student_feats, student_heatmap_output, student_hw_output
 
 
 total_mAP, total_mAP50 = [], []
-total_heatmap_losses, total_wh_losses, total_kd_losses, total_losses = [], [], [], []
+total_heatmap_losses, total_hw_losses, total_kd_losses, total_losses = [], [], [], []
 
 
 def train(device, train_loader, student, distiller, criterion, kd_criterion, optimizer, scheduler, epoch, args):
@@ -244,7 +244,7 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
 
     iter_index = 1
     iters = len(train_loader.dataset) // (args.per_node_batch_size * gpus_num)
-    heatmap_losses, wh_losses, kd_losses, losses = [], [], [], []
+    heatmap_losses, hw_losses, kd_losses, losses = [], [], [], []
     one_epoch_start = time.time()
 
     for one_data in train_loader:
@@ -252,19 +252,19 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
         images, annotations = images.to(device).float(), annotations.to(device)
 
         if args.kd:
-            teacher_feats, student_feats, student_heatmap_output, student_wh_output = distiller.forward(images)
+            teacher_feats, student_feats, student_heatmap_output, student_hw_output = distiller.forward(images)
 
             kd_loss = 0
             for teacher_feat, student_feat in zip(teacher_feats, student_feats):
                 kd_loss += kd_criterion(teacher_feat, student_feat)
-            heatmap_loss, wh_loss = criterion(student_heatmap_output, student_wh_output, annotations)
-            hard_loss = heatmap_loss + wh_loss
+            heatmap_loss, hw_loss = criterion(student_heatmap_output, student_hw_output, annotations)
+            hard_loss = heatmap_loss + hw_loss
             loss = hard_loss + kd_loss
         else:
-            student_heatmap_output, student_wh_output = student(images)
-            heatmap_loss, wh_loss = criterion(student_heatmap_output, student_wh_output, annotations)
+            student_heatmap_output, student_hw_output = student(images)
+            heatmap_loss, hw_loss = criterion(student_heatmap_output, student_hw_output, annotations)
             kd_loss = torch.tensor([0])
-            loss = heatmap_loss + wh_loss
+            loss = heatmap_loss + hw_loss
 
         optimizer.zero_grad()
         if args.apex:
@@ -277,7 +277,7 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
         optimizer.step()
 
         heatmap_losses.append(heatmap_loss.item())
-        wh_losses.append(wh_loss.item())
+        hw_losses.append(hw_loss.item())
         kd_losses.append(kd_loss.item())
         losses.append(loss.item())
 
@@ -285,7 +285,7 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
             logger.info(
                 f"train: epoch {epoch:0>3d}, iter [{iter_index:0>5d}, {iters:0>5d}], "
                 f"lr:{optimizer.param_groups[0]['lr']:.6f}, heatmap_loss: {heatmap_loss.item():.2f}, "
-                f"wh_loss: {wh_loss.item():.2f}, kd_loss: {kd_loss.item():.2f}, loss_total: {loss.item():.2f}"
+                f"hw_loss: {hw_loss.item():.2f}, kd_loss: {kd_loss.item():.2f}, loss_total: {loss.item():.2f}"
             )
             cur_cost = (time.time() - one_epoch_start) / iter_index * (iters * (args.epochs - epoch + 1) - iter_index)
             hour = cur_cost // 3600
@@ -313,13 +313,13 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
     # scheduler.step(np.mean(losses))  # for ReduceLROnPlateau scheduler
     # scheduler.step()  # step by epoch
 
-    global total_heatmap_losses, total_wh_losses, total_kd_losses, total_losses
+    global total_heatmap_losses, total_hw_losses, total_kd_losses, total_losses
     total_heatmap_losses += heatmap_losses
-    total_wh_losses += wh_losses
+    total_hw_losses += hw_losses
     total_kd_losses += kd_losses
     total_losses += losses
 
-    return np.mean(heatmap_losses), np.mean(wh_losses), np.mean(kd_losses), np.mean(losses)
+    return np.mean(heatmap_losses), np.mean(hw_losses), np.mean(kd_losses), np.mean(losses)
 
 
 @torch.no_grad()
@@ -418,7 +418,7 @@ def evaluate_coco(val_dataset, model, decoder, args):
 
 def main():
     global total_mAP, total_mAP50
-    global total_heatmap_losses, total_wh_losses, total_kd_losses, total_losses
+    global total_heatmap_losses, total_hw_losses, total_kd_losses, total_losses
 
     args = parse_args()
     global local_rank
@@ -601,8 +601,8 @@ def main():
         if local_rank == 0:
             logger.info(
                 f"finish resuming model from {args.resume}, epoch {checkpoint['epoch']}, best_map: {checkpoint['best_map']}, "
-                f"loss: {checkpoint['loss']:.2f}, cls_loss: {checkpoint['cls_loss']:.2f}, "
-                f"center_ness_loss: {checkpoint['center_ness_loss']:.2f}, kd_loss: {checkpoint['kd_loss']:.2f}"
+                f"loss: {checkpoint['loss']:.2f}, heatmap_loss: {checkpoint['heatmap_loss']:.2f}, "
+                f"hw_loss: {checkpoint['hw_loss']:.2f}, kd_loss: {checkpoint['kd_loss']:.2f}"
             )
 
     if args.kd:
@@ -619,14 +619,14 @@ def main():
 
     for epoch in range(start_epoch, args.epochs + 1):
         train_sampler.set_epoch(epoch)
-        cls_losses, center_ness_losses, kd_losses, losses = train(
+        heatmap_loss, hw_loss, kd_loss, total_loss = train(
             device, train_loader, student, distiller, criterion, kd_criterion, optimizer, scheduler, epoch, args
         )
 
         if local_rank == 0:
             logger.info(
-                f"train: epoch {epoch:0>3d}, heatmap_loss: {cls_losses:.2f},"
-                f"wh_loss: {center_ness_losses:.2f}, wh_loss: {kd_losses:.2f}, loss: {losses:.2f}"
+                f"train: epoch {epoch:0>3d}, heatmap_loss: {heatmap_loss:.2f},"
+                f"hw_loss: {hw_loss:.2f}, kd_loss: {kd_loss:.2f}, total_loss: {total_loss:.2f}"
             )
 
         if epoch % Config.eval_interval == 0 or epoch == args.epochs:
@@ -661,10 +661,10 @@ def main():
                 {
                     'epoch': epoch,
                     'best_map': best_map,
-                    'cls_loss': cls_losses,
-                    'center_ness_loss': center_ness_losses,
-                    'kd_loss': kd_losses,
-                    'loss': losses,
+                    'heatmap_loss': heatmap_loss,
+                    'hw_loss': hw_loss,
+                    'kd_loss': kd_loss,
+                    'total_loss': total_loss,
                     'model_state_dict': student.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
                     'scheduler_state_dict': scheduler.state_dict(),
@@ -679,13 +679,13 @@ def main():
         total_mAP = np.array(total_mAP)
         total_mAP50 = np.array(total_mAP50)
         total_heatmap_losses = np.array(total_heatmap_losses)
-        total_wh_losses = np.array(total_wh_losses)
+        total_hw_losses = np.array(total_hw_losses)
         total_kd_losses = np.array(total_kd_losses)
         total_losses = np.array(total_losses)
         np.save(os.path.join(args.checkpoints, "total_mAP.npy"), total_mAP)
         np.save(os.path.join(args.checkpoints, "total_mAP50.npy"), total_mAP50)
         np.save(os.path.join(args.checkpoints, "total_heatmap_losses.npy"), total_heatmap_losses)
-        np.save(os.path.join(args.checkpoints, "total_wh_losses.npy"), total_wh_losses)
+        np.save(os.path.join(args.checkpoints, "total_hw_losses.npy"), total_hw_losses)
         np.save(os.path.join(args.checkpoints, "total_kd_losses.npy"), total_kd_losses)
         np.save(os.path.join(args.checkpoints, "total_losses.npy"), total_losses)
 

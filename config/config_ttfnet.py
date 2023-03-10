@@ -18,9 +18,8 @@ class Config(object):
 
     num_classes = 11
 
-    epoch_rate = 10
-    epochs = 10 * epoch_rate
-    milestones = [8 * epoch_rate, 9 * epoch_rate]
+    epochs = 100
+    milestones = [int(0.8 * epochs), int(0.9 * epochs)]
 
     mosaic = False
 
