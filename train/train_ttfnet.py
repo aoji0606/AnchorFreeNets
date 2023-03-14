@@ -128,6 +128,14 @@ def parse_args():
                         type=bool,
                         default=Config.kd,
                         help='use kd or not')
+    parser.add_argument('--kd_weight',
+                        type=float,
+                        default=Config.kd_weight,
+                        help='weight of kd_loss')
+    parser.add_argument('--teacher_path',
+                        type=str,
+                        default=Config.teacher_path,
+                        help='teacher checkpoints path')
 
     return parser.parse_args()
 
@@ -259,6 +267,7 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
                 kd_loss += kd_criterion(teacher_feat, student_feat)
             heatmap_loss, hw_loss = criterion(student_heatmap_output, student_hw_output, annotations)
             hard_loss = heatmap_loss + hw_loss
+            kd_loss = kd_loss * args.kd_weight
             loss = hard_loss + kd_loss
         else:
             student_heatmap_output, student_hw_output = student(images)
@@ -480,7 +489,7 @@ def main():
 
     # load model
     if args.kd:
-        teacher = torch.load(Config.teacher_path)
+        teacher = torch.load(args.teacher_path)
         kd_criterion = SSIMLoss().to(device)
     else:
         teacher = None

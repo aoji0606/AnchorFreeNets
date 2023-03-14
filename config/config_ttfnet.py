@@ -35,7 +35,8 @@ class Config(object):
     sync_bn = True
 
     kd = True
-    teacher_path = "../train/teacher.pth"
+    kd_weight = 1.0
+    teacher_path = "./teacher.pth"
     teacher_kd_layers = ["module.neck.public_deconv_head.0.relu",
                          "module.neck.public_deconv_head.2.relu",
                          "module.neck.public_deconv_head.4.relu"]
@@ -123,7 +124,7 @@ class Config(object):
         hm_weight=1.,
         wh_weight=5.,  # 0.1,
         epsilon=1e-4,
-        gaussian_radius_alpha=0.54,  # radius for ttfnet
+        gaussian_radius_alpha=0.54,  # 0.54 radius for ttfnet
         min_overlap=0.7,  # radius for centernet, not actually used
         max_object_num=100
     )
