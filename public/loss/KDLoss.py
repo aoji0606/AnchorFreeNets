@@ -11,9 +11,8 @@ class SSIMLoss(nn.Module):
         if isinstance(preds_S, torch.Tensor):
             preds_S, preds_T = (preds_S,), (preds_T,)
 
-        loss = 0.
+        loss = 0.0
         for pred_S, pred_T in zip(preds_S, preds_T):
-            assert pred_S.shape == pred_T.shape
             loss += ssim_loss(pred_S, pred_T, window_size=11)
 
         return loss
