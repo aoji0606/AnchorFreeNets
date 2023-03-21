@@ -831,42 +831,53 @@ class RandomColorAndBlur(object):
 if __name__ == '__main__':
     import torchvision.transforms as transforms
 
-    if not os.path.join("/home/jovyan/fast-data/test/"):
-        os.mkdir("/home/jovyan/fast-data/test/")
+    save_path = "/home/jovyan/fast-data/test"
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
 
-    size = (400, 600)
-#     size=(512,512)
-    base_path = '/home/jovyan/data-vol-polefs-1/dataset/sdj/labeled/'
+    size = (512, 512)
+    base_path = "/home/jovyan/fast-data/voc/"
+    train_dataset_path = os.path.join(base_path, "images", "train_07_12")
+    val_dataset_path = os.path.join(base_path, "images", "test_07")
+    dataset_annotations_path = os.path.join(base_path, "annotations")
+
     train_dataset = CocoDetection(
-        image_root_dir=base_path,
-        annotation_root_dir=base_path,
+        image_root_dir=val_dataset_path,
+        annotation_root_dir=dataset_annotations_path,
         set="test",
         transform=transforms.Compose([
-#             RandomColorAndBlur(),
-#             RandomAffine(prob=0.3),
-#             RandomFlip(flip_prob=0.5),
-#             RandomCrop(crop_prob=0.3),
-#             RandomTranslate(translate_prob=1),
+            RandomColorAndBlur(),
+            RandomAffine(prob=0.3),
+            RandomFlip(flip_prob=0.5),
+            RandomCrop(crop_prob=0.3),
+            RandomTranslate(translate_prob=1),
             Normalize(),
-            # Actual multiscale ranges: [640 - 5 * 32, 640 + 5 * 32].
-#             Resize(resize=size, stride=32, multiscale_range=3)  # multi-scale image
-            Resize(resize=size)  # uniform-scale image
+            Resize(resize=size, stride=32, multiscale_range=3),  # multi-scale image
+            # Resize(resize=size)  # uniform-scale image
         ]),
-        mosaic=True,
+        mosaic=False,
         mosaic_prob=0.5,
         image_size=size
     )
-    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=1)
-    it = iter(train_loader)
-    for i in range(10):
-        sample = it.next()
-        im = sample["img"][0].numpy().astype(np.float32) * 255
 
-        bbox = sample["annot"][0].numpy().astype(np.int32)
-        print(im.shape)
-        print(bbox)
-        im = cv2.cvtColor(im, cv2.COLOR_RGB2BGR)
-        for item in bbox:
-            cv2.rectangle(im, (item[0], item[1]), (item[2], item[3]), (255, 0, 0), 2)
-        cv2.imwrite("/home/jovyan/fast-data/test/{}.jpg".format(i + 1), im)
-        print("/home/jovyan/fast-data/test/{}.jpg".format(i + 1))
+    train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=1)
+
+    for i, sample in enumerate(train_loader):
+        if i == 10:
+            break
+
+        image = sample["img"]
+        anno = sample["annot"]
+        scale = sample["scale"]
+
+        image = image[0].numpy().astype(np.float32) * 255
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        bboxes = anno[0].numpy().astype(np.int32)
+
+        for bbox in bboxes:
+            x1, y1, x2, y2, cls_id = bbox
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv2.putText(image, str(cls_id), (x1, y1), 0, 1, (0, 0, 255), 2)
+
+        cv2.imwrite("{}/{}.jpg".format(save_path, i + 1), image)
+        print("{}/{}.jpg".format(save_path, i + 1))
