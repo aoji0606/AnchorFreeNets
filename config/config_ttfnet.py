@@ -16,14 +16,14 @@ class Config(object):
     # the type of network: FCOS, CenterNet.... in public.models
     network = "TTFNet"
 
-    num_classes = 11
+    num_classes = 20
 
-    epochs = 100
+    epochs = 50
     milestones = [int(0.8 * epochs), int(0.9 * epochs)]
 
     mosaic = False
 
-    input_image_size = (288, 512)
+    input_image_size = (512, 512)
     per_node_batch_size = 32
     lr = 8e-3 / 20  # adamw lr
     warmup_epochs = min(epochs // 10, 5)
@@ -34,8 +34,8 @@ class Config(object):
     apex = False
     sync_bn = True
 
-    kd = True
-    kd_weight = 1.0
+    kd = False
+    kd_weight = 2.0
     teacher_path = "./teacher.pth"
     teacher_kd_layers = ["module.neck.public_deconv_head.0.relu",
                          "module.neck.public_deconv_head.2.relu",
@@ -48,8 +48,8 @@ class Config(object):
     '''backbone'''
     # the type of backbone: rmobilenet, resnet18, resnet50, swin_t, swin_b, repvgg_a0 ...  in public.backbone
     # backbone_type = "convnext"
-    # backbone_type = "resnet18"
-    backbone_type = "mobilenetv2"
+    backbone_type = "resnet18"
+    # backbone_type = "mobilenetv2"
 
     pretrained = True
     backbone_dict = dict(out_indices=(3,)) if 'swin' in backbone_type else None
@@ -100,7 +100,7 @@ class Config(object):
     head_dict = dict(
         num_classes=num_classes,
         out_channels=neck_out_channles,
-        depthwise=True
+        depthwise=False
     )
 
     '''************************************************************'''
@@ -143,16 +143,16 @@ class Config(object):
     # dataset_annotations_path = os.path.join(base_path, 'annotations')
 
     # voc
-    # base_path = "/home/jovyan/data-vol-polefs-1/codebase/dataset/voc_coco_format/"
-    # train_dataset_path = os.path.join(base_path, "images", "train2017")
-    # val_dataset_path = os.path.join(base_path, "images", "test_07")
-    # dataset_annotations_path = os.path.join(base_path, "annotations")
+    base_path = "/home/jovyan/fast-data/voc/"
+    train_dataset_path = os.path.join(base_path, "images", "train_07_12")
+    val_dataset_path = os.path.join(base_path, "images", "test_07")
+    dataset_annotations_path = os.path.join(base_path, "annotations")
 
     # sdj
-    base_path = '/home/jovyan/fast-data/labeled/'
-    train_dataset_path = base_path
-    val_dataset_path = base_path
-    dataset_annotations_path = base_path
+    # base_path = '/home/jovyan/fast-data/labeled/'
+    # train_dataset_path = base_path
+    # val_dataset_path = base_path
+    # dataset_annotations_path = base_path
 
     train_dataset = CocoDetection(
         image_root_dir=train_dataset_path,
