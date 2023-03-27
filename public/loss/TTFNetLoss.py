@@ -255,18 +255,15 @@ class TTFNetLoss(nn.Module):
         return radius
 
     def gaussian_2d(self, shape, sigma=(1, 1)):  # for ttfnet
-        sigma_x, sigma_y = sigma
-
-        m, n = [(ss - 1.) / 2. for ss in shape]
-        y, x = np.ogrid[-m:m + 1, -n:n + 1]
-
-        h = np.exp(-(x * x / (2 * sigma_x * sigma_x) + y * y / (2 * sigma_y * sigma_y)))
-
-#         print("*"*20)
-#         print(shape, h)
-#         print("*"*20)
-        
-        h[h < np.finfo(h.dtype).eps * h.max()] = 0
+        try:
+            sigma_x, sigma_y = sigma
+            m, n = [(ss - 1.) / 2. for ss in shape]
+            y, x = np.ogrid[-m:m + 1, -n:n + 1]
+            h = np.exp(-(x * x / (2 * sigma_x * sigma_x) + y * y / (2 * sigma_y * sigma_y)))
+            h[h < np.finfo(h.dtype).eps * h.max()] = 0
+        except:
+            print("shape error:", shape)
+            h = []
 
         return h
 
