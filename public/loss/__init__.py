@@ -4,4 +4,4 @@ from .RetinaLoss import RetinaLoss
 from .Yolov3Loss import YOLOV3Loss
 from .TTFNetLoss import TTFNetLoss
 # from .Yolov5Loss import
-from .SSIMLoss import SSIMLoss
+from .KDLoss import *

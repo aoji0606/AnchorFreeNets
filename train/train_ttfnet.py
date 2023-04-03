@@ -42,11 +42,11 @@ sys.path.append("../")
 
 from config.config_ttfnet import Config
 from public.dataset.cocodataset import Collater
-from public.loss import TTFNetLoss, SSIMLoss
+from public.loss import TTFNetLoss, SSIMLoss, RKDLoss
 from public.decoder import TTFNetDecoder
 from public import models
 from public.utils import get_logger, param_groups_lrd
-from public.utils import StepLRWithWarmup, CosineAnnealingLRWithWarmup
+from public.utils import StepLRWithWarmup
 
 
 def parse_args():
@@ -491,6 +491,7 @@ def main():
     if args.kd:
         teacher = torch.load(args.teacher_path)
         kd_criterion = SSIMLoss().to(device)
+        # kd_criterion = RKDLoss(1.0, 2.0).to(device)
     else:
         teacher = None
         kd_criterion = None
