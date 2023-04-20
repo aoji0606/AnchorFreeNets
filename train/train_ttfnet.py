@@ -664,6 +664,7 @@ def main():
                         f"IoU=0.5:0.95,area=large,maxDets=100,mAR:{all_eval_result[11]:.4f}"
                     )
                     if all_eval_result[0] > best_map:
+                        logger.info("save best model")
                         torch.save(student.module.state_dict(), os.path.join(args.checkpoints, "best.pth"))
                         best_map = all_eval_result[0]
 
