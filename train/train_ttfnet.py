@@ -264,7 +264,7 @@ def train(device, train_loader, student, distiller, criterion, kd_criterion, opt
 
             kd_loss = 0
             for teacher_feat, student_feat in zip(teacher_feats, student_feats):
-                kd_loss += kd_criterion(teacher_feat, student_feat)
+                kd_loss += kd_criterion(teacher_feat.clone(), student_feat.clone())
             heatmap_loss, hw_loss = criterion(student_heatmap_output, student_hw_output, annotations)
             hard_loss = heatmap_loss + hw_loss
             kd_loss = kd_loss * args.kd_weight
