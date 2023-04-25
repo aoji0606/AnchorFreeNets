@@ -34,7 +34,7 @@ if __name__ == "__main__":
     model.eval()
     model.cuda()
 
-    x = torch.randn([1, 3, 512, 512]).cuda()
+    x = torch.randn([1, 3, Config.input_image_size[0], Config.input_image_size[1]]).cuda()
     with torch.no_grad():
         torch.onnx.export(
             model,
