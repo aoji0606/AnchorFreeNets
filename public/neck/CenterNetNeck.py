@@ -85,9 +85,9 @@ class CenterNetNeck(nn.Module):
 
             self.inplanes = out_channels[i]
 
-        self.public_deconv_head = nn.Sequential(*layers)
+        self.deconv_neck = nn.Sequential(*layers)
 
-        for m in self.public_deconv_head.modules():
+        for m in self.deconv_neck.modules():
             if isinstance(m, nn.ConvTranspose2d):
                 w = m.weight.data
                 f = math.ceil(w.size(2) / 2)
@@ -100,6 +100,6 @@ class CenterNetNeck(nn.Module):
                     w[c, 0, :, :] = w[0, 0, :, :]
 
     def forward(self, x):
-        out = self.public_deconv_head(x[-1])
+        out = self.deconv_neck(x[-1])
         del x
         return [out]
