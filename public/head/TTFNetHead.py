@@ -47,7 +47,7 @@ class TTFNetHead(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Conv2d(128, num_classes, kernel_size=1, stride=1, bias=True),
             )
-            self.wh_head = nn.Sequential(
+            self.hw_head = nn.Sequential(
                 nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1,
                           groups=out_channels, bias=False),
                 nn.BatchNorm2d(out_channels),
@@ -67,7 +67,7 @@ class TTFNetHead(nn.Module):
                 nn.ReLU(inplace=True),
                 nn.Conv2d(128, num_classes, kernel_size=1, stride=1, bias=True),
             )
-            self.wh_head = nn.Sequential(
+            self.hw_head = nn.Sequential(
                 nn.Conv2d(out_channels, 64, kernel_size=3, stride=1, padding=1, bias=True),
                 nn.BatchNorm2d(64),
                 nn.ReLU(inplace=True),
@@ -86,7 +86,7 @@ class TTFNetHead(nn.Module):
                     pass
         nn.init.constant_(self.heatmap_head[-1].bias, float(-np.log((1 - 0.01) / 0.01)))
 
-        for m in self.wh_head.modules():
+        for m in self.hw_head.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.normal_(m.weight, std=0.001)
                 try:
@@ -96,6 +96,6 @@ class TTFNetHead(nn.Module):
 
     def forward(self, x):
         heatmap_output = self.heatmap_head(x[-1])
-        wh_output = F.relu(self.wh_head(x[-1])) * self.wh_offset_base  # scale wh
+        wh_output = F.relu(self.hw_head(x[-1])) * self.wh_offset_base  # scale wh
         return heatmap_output, wh_output
 
