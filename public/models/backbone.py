@@ -195,8 +195,32 @@ class MobileNetV2Backbone(nn.Module):
         return features
 
 
+class MobileOneBackbone(nn.Module):
+    def __init__(self, type='', pretrained=False):
+        super(MobileOneBackbone, self).__init__()
+        model = backbone.mobileone(variant="s1", inference_mode=False)
+        model.load_state_dict(torch.load("../public/models/mobileone_s1_unfused.pth.tar", "cpu"))
+
+        self.model = nn.ModuleDict({
+            'stage0': model.stage0,
+            'stage1': model.stage1,
+            'stage2': model.stage2,
+            'stage3': model.stage3,
+            'stage4': model.stage4,
+        })
+
+    def forward(self, x):
+        x0 = self.model.stage0(x)
+        x1 = self.model.stage1(x0)
+        x2 = self.model.stage2(x1)
+        x3 = self.model.stage3(x2)
+        x4 = self.model.stage4(x3)
+
+        return [x1, x2, x3, x4]
+
+
 class ConvNextBackbone(nn.Module):
-    def __init__(self, mobilenet_type='mobilenetv2', pretrained=False):
+    def __init__(self, type='', pretrained=False):
         super(ConvNextBackbone, self).__init__()
         model = torchvision.models.convnext_large(pretrained=pretrained)
 
@@ -708,6 +732,8 @@ def get_backbone(backbone_type, pretrained, backbone_dict={}):
         return MobileNetV2Backbone(backbone_type, pretrained)
     elif "convnext" in backbone_type:
         return ConvNextBackbone(backbone_type, pretrained)
+    elif "mobileone" in backbone_type:
+        return MobileOneBackbone(backbone_type, pretrained)
 
 
 if __name__ == '__main__':

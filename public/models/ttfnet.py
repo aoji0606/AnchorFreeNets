@@ -69,7 +69,8 @@ class TTFNet(nn.Module):
             # 'rmnet_pruning_34': (64, 128, 256, 512),
 
             "mobilenetv2": (24, 32, 96, 320),
-            "convnext": (192, 384, 768, 1536)
+            "mobileone": (96, 196, 512, 1280),
+            "convnext": (192, 384, 768, 1536),
         }
 
         # self.neck = CenterNetNeck(inplanes=C5_inplanes, **neck_dict)

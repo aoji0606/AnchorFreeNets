@@ -50,6 +50,7 @@ class Config(object):
     # backbone_type = "convnext"
     backbone_type = "resnet18"
     # backbone_type = "mobilenetv2"
+    # backbone_type = "mobileone"
 
     pretrained = True
     backbone_dict = dict(out_indices=(3,)) if 'swin' in backbone_type else None

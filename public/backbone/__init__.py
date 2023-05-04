@@ -12,3 +12,4 @@ from .repvgg_pruning import *
 from .rmnet_pruning import *
 from .rmobilenet import *
 from .rmobilenet_pruning import *
+from .mobileone import *
